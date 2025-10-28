@@ -294,3 +294,176 @@ Algoritmo SistemaGestionProcesos
 		Escribir ''
 		Escribir 'Presione ENTER para continuar...'
 		Esperar Tecla
+			5:
+				// ============================================================
+				// OPCION 5: EJECUTAR PROCESO (Desencolar)
+				// ============================================================
+				Limpiar Pantalla
+				Escribir '=========================================================='
+				Escribir '   EJECUTAR PROCESO (Desencolar)'
+				Escribir '=========================================================='
+				Escribir ''
+				Si contadorCola=0 Entonces
+					Escribir '[ERROR] No hay procesos en la cola de ejecucion'
+					Escribir ''
+					Escribir 'Agregue procesos usando la opcion 1 del menu.'
+				SiNo
+					// Obtener el primer proceso de la cola (mayor prioridad)
+					idEnCola <- colaEjecucionID[1]
+					// Buscar informacion del proceso
+					Escribir 'Proceso a ejecutar:'
+					Para i<-1 Hasta contadorProcesos Con Paso 1 Hacer
+						Si listaProcesosID[i]=idEnCola Entonces
+							Escribir '  ID:        ', listaProcesosID[i]
+							Escribir '  Nombre:    ', listaProcesosNombre[i]
+							Escribir '  Prioridad: ', listaProcesosPrioridad[i]
+							Escribir '  Memoria:   Bloque ', listaProcesosMemoria[i]
+						FinSi
+					FinPara
+					Escribir ''
+					Escribir '=========================================================='
+					Escribir 'EJECUTANDO PROCESO...'
+					Escribir '=========================================================='
+					// Simular ejecucion
+					Escribir '[OK] Proceso ID ', idEnCola, ' en ejecucion...'
+					Escribir '[OK] Proceso completado exitosamente'
+					// DESENCOLAR: Eliminar de la cola (mover todos hacia adelante)
+					Para i<-1 Hasta contadorCola-1 Con Paso 1 Hacer
+						colaEjecucionID[i] <- colaEjecucionID[i+1]
+					FinPara
+					contadorCola <- contadorCola-1
+					Escribir '[OK] Proceso removido de la cola de ejecucion'
+					Escribir ''
+					Escribir '=========================================================='
+					Escribir '   PROCESO EJECUTADO EXITOSAMENTE'
+					Escribir '=========================================================='
+					Escribir 'Procesos restantes en cola: ', contadorCola
+				FinSi
+				Escribir ''
+				Escribir 'Presione ENTER para continuar...'
+				Esperar Tecla
+			6:
+				// ============================================================
+				// OPCION 6: ELIMINAR PROCESO
+				// ============================================================
+				Limpiar Pantalla
+				Escribir '=========================================================='
+				Escribir '   ELIMINAR PROCESO'
+				Escribir '=========================================================='
+				Escribir ''
+				Si contadorProcesos=0 Entonces
+					Escribir '[ERROR] No hay procesos en el sistema'
+					Escribir ''
+					Escribir 'Agregue procesos usando la opcion 1 del menu.'
+				SiNo
+					// Mostrar procesos disponibles
+					Escribir 'Procesos disponibles:'
+					Escribir ''
+					Escribir 'ID    NOMBRE                PRIORIDAD'
+					Escribir '----------------------------------------------'
+					Para i<-1 Hasta contadorProcesos Con Paso 1 Hacer
+						Escribir listaProcesosID[i], '     ', listaProcesosNombre[i], '           ', listaProcesosPrioridad[i]
+					FinPara
+					Escribir ''
+					// Solicitar ID del proceso a eliminar
+					Escribir 'Ingrese el ID del proceso a eliminar: 'Sin Saltar
+					Leer ID
+					// Buscar el proceso
+					existeID <- Falso
+					posInsercion <- 0
+					Para i<-1 Hasta contadorProcesos Con Paso 1 Hacer
+						Si listaProcesosID[i]=ID Entonces
+							existeID <- Verdadero
+							posInsercion <- i
+							bloqueMemoria <- listaProcesosMemoria[i]
+							nombre <- listaProcesosNombre[i]
+						FinSi
+					FinPara
+					Si existeID Entonces
+						Escribir ''
+						Escribir '=========================================================='
+						Escribir 'ELIMINANDO PROCESO: ', nombre, ' (ID: ', ID, ')'
+						Escribir '=========================================================='
+						// PASO 1: ELIMINAR DE LA LISTA
+						Para i<-posInsercion Hasta contadorProcesos-1 Con Paso 1 Hacer
+							listaProcesosID[i] <- listaProcesosID[i+1]
+							listaProcesosNombre[i] <- listaProcesosNombre[i+1]
+							listaProcesosPrioridad[i] <- listaProcesosPrioridad[i+1]
+							listaProcesosMemoria[i] <- listaProcesosMemoria[i+1]
+						FinPara
+						contadorProcesos <- contadorProcesos-1
+						Escribir '[OK] Proceso removido de la lista'
+						// PASO 2: ELIMINAR DE LA COLA
+						existeBloque <- Falso
+						Para i<-1 Hasta contadorCola Con Paso 1 Hacer
+							Si colaEjecucionID[i]=ID Entonces
+								existeBloque <- Verdadero
+								posInsercion <- i
+							FinSi
+						FinPara
+						Si existeBloque Entonces
+							Para i<-posInsercion Hasta contadorCola-1 Con Paso 1 Hacer
+								colaEjecucionID[i] <- colaEjecucionID[i+1]
+							FinPara
+							contadorCola <- contadorCola-1
+							Escribir '[OK] Proceso removido de la cola de ejecucion'
+						FinSi
+						// PASO 3: LIBERAR MEMORIA (POP de la pila)
+						existeBloque <- Falso
+						Para i<-1 Hasta contadorPila Con Paso 1 Hacer
+							Si pilaMemoriaID[i]=ID Entonces
+								existeBloque <- Verdadero
+								posInsercion <- i
+							FinSi
+						FinPara
+						Si existeBloque Entonces
+							Para i<-posInsercion Hasta contadorPila-1 Con Paso 1 Hacer
+								pilaMemoriaID[i] <- pilaMemoriaID[i+1]
+								pilaMemoriaBloque[i] <- pilaMemoriaBloque[i+1]
+							FinPara
+							contadorPila <- contadorPila-1
+							Escribir '[OK] Bloque de memoria ', bloqueMemoria, ' liberado'
+						FinSi
+						Escribir ''
+						Escribir '=========================================================='
+						Escribir '   PROCESO ELIMINADO EXITOSAMENTE'
+						Escribir '=========================================================='
+						Escribir 'Procesos activos restantes: ', contadorProcesos
+					SiNo
+						Escribir ''
+						Escribir '[ERROR] No existe un proceso con el ID ', ID
+					FinSi
+				FinSi
+				Escribir ''
+				Escribir 'Presione ENTER para continuar...'
+				Esperar Tecla
+			0:
+				// ============================================================
+				// SALIR DEL SISTEMA
+				// ============================================================
+				Limpiar Pantalla
+				Escribir '=========================================================='
+				Escribir '   CERRANDO SISTEMA DE GESTION DE PROCESOS'
+				Escribir '=========================================================='
+				Escribir ''
+				Escribir 'Gracias por usar el sistema.'
+				Escribir 'Grupo C - NRC 62159'
+				Escribir ''
+				Escribir '=========================================================='
+				continuar <- Falso
+			De Otro Modo:
+				// ============================================================
+				// OPCION INVALIDA
+				// ============================================================
+				Limpiar Pantalla
+				Escribir '=========================================================='
+				Escribir '[ERROR] Opcion no valida'
+				Escribir '=========================================================='
+				Escribir ''
+				Escribir 'Por favor, seleccione una opcion valida (0-6).'
+				Escribir ''
+				Escribir 'Presione ENTER para continuar...'
+				Esperar Tecla
+		FinSegún
+	FinMientras
+FinAlgoritmo
