@@ -1,543 +1,150 @@
-Proceso SistemaGestionProcesos
-    
-    // ===================================================================
-    // DECLARACION DE VARIABLES GLOBALES
-    // ===================================================================
-    Definir opcion Como Entero
-    Definir continuar Como Logico
-    Definir ID, prioridad, bloqueMemoria Como Entero
-    Definir nombre Como Cadena
-    Definir existeID, existeBloque, procesoValido Como Logico
-    Definir i, j Como Entero
-    Definir posInsercion, prioridadActual, idEnCola Como Entero
-    
-    // Arreglos para almacenar hasta 100 procesos
-    Dimension listaProcesosID[100]
-    Dimension listaProcesosNombre[100]
-    Dimension listaProcesosPrioridad[100]
-    Dimension listaProcesosMemoria[100]
-    Dimension colaEjecucionID[100]
-    Dimension pilaMemoriaID[100]
-    Dimension pilaMemoriaBloque[100]
-    
-    // Inicializar contadores
-    contadorProcesos <- 0
-    contadorCola <- 0
-    contadorPila <- 0
-    
-    continuar <- Verdadero
-    
-    // ===================================================================
-    // BUCLE PRINCIPAL DEL MENU
-    // ===================================================================
-    Mientras continuar Hacer
-        
-        Limpiar Pantalla
-        Escribir "=========================================================="
-        Escribir "   SISTEMA DE GESTION DE PROCESOS - GRUPO C"
-        Escribir "   Estructura de Datos - NRC: 62159"
-        Escribir "=========================================================="
-        Escribir ""
-        Escribir "MENU PRINCIPAL:"
-        Escribir "  1. Agregar Nuevo Proceso"
-        Escribir "  2. Mostrar Lista de Procesos"
-        Escribir "  3. Mostrar Cola de Ejecucion"
-        Escribir "  4. Mostrar Estado de Memoria"
-        Escribir "  5. Ejecutar Proceso (Desencolar)"
-        Escribir "  6. Eliminar Proceso"
-        Escribir "  0. Salir del Sistema"
-        Escribir "=========================================================="
-        Escribir ""
-        Escribir "Estado actual del sistema:"
-        Escribir "  - Procesos Activos: ", contadorProcesos
-        Escribir "  - Procesos en Cola: ", contadorCola
-        Escribir "  - Bloques de Memoria Ocupados: ", contadorPila
-        Escribir ""
-        Escribir Sin Saltar "Seleccione una opcion: "
-        Leer opcion
-        
-        Segun opcion Hacer
-            
-            Caso 1:
-                // ============================================================
-                // OPCION 1: AGREGAR NUEVO PROCESO
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   AGREGAR NUEVO PROCESO"
-                Escribir "=========================================================="
-                Escribir ""
-                
-                // Solicitar datos del proceso
-                Escribir "Ingrese el ID del proceso (numero entero positivo y unico):"
-                Escribir Sin Saltar "ID: "
-                Leer ID
-                
-                Escribir ""
-                Escribir "Ingrese el nombre del proceso:"
-                Escribir Sin Saltar "Nombre: "
-                Leer nombre
-                
-                Escribir ""
-                Escribir "Ingrese la prioridad (1 = maxima prioridad, 2, 3, 4...):"
-                Escribir Sin Saltar "Prioridad: "
-                Leer prioridad
-                
-                Escribir ""
-                Escribir "Ingrese el bloque de memoria a asignar (numero entero positivo y unico):"
-                Escribir Sin Saltar "Bloque: "
-                Leer bloqueMemoria
-                
-                Escribir ""
-                Escribir "=========================================================="
-                Escribir "VALIDANDO DATOS..."
-                Escribir "=========================================================="
-                
-                // Inicializar bandera de validacion
-                procesoValido <- Verdadero
-                
-                // VALIDACION 1: ID debe ser positivo
-                Si ID <= 0 Entonces
-                    Escribir "[ERROR] El ID debe ser un numero positivo mayor que 0"
-                    procesoValido <- Falso
-                FinSi
-                
-                // VALIDACION 2: Prioridad debe ser positiva
-                Si prioridad <= 0 Entonces
-                    Escribir "[ERROR] La prioridad debe ser un numero positivo (1 o mayor)"
-                    procesoValido <- Falso
-                FinSi
-                
-                // VALIDACION 3: Bloque de memoria debe ser positivo
-                Si bloqueMemoria <= 0 Entonces
-                    Escribir "[ERROR] El bloque de memoria debe ser un numero positivo"
-                    procesoValido <- Falso
-                FinSi
-                
-                // VALIDACION 4: Nombre no puede estar vacio
-                Si Longitud(nombre) = 0 Entonces
-                    Escribir "[ERROR] El nombre del proceso no puede estar vacio"
-                    procesoValido <- Falso
-                FinSi
-                
-                // VALIDACION 5: ID debe ser unico
-                Si procesoValido Entonces
-                    existeID <- Falso
-                    Para i <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                        Si listaProcesosID[i] = ID Entonces
-                            existeID <- Verdadero
-                        FinSi
-                    FinPara
-                    
-                    Si existeID Entonces
-                        Escribir "[ERROR] Ya existe un proceso con el ID ", ID
-                        procesoValido <- Falso
-                    FinSi
-                FinSi
-                
-                // VALIDACION 6: Bloque de memoria debe ser unico
-                Si procesoValido Entonces
-                    existeBloque <- Falso
-                    Para i <- 1 Hasta contadorPila Con Paso 1 Hacer
-                        Si pilaMemoriaBloque[i] = bloqueMemoria Entonces
-                            existeBloque <- Verdadero
-                        FinSi
-                    FinPara
-                    
-                    Si existeBloque Entonces
-                        Escribir "[ERROR] El bloque de memoria ", bloqueMemoria, " ya esta ocupado"
-                        procesoValido <- Falso
-                    FinSi
-                FinSi
-                
-                // Si todas las validaciones pasaron, registrar el proceso
-                Si procesoValido Entonces
-                    
-                    Escribir ""
-                    Escribir "Validacion exitosa. Registrando proceso..."
-                    Escribir ""
-                    
-                    // PASO 1: INSERTAR EN LISTA ENLAZADA
-                    contadorProcesos <- contadorProcesos + 1
-                    listaProcesosID[contadorProcesos] <- ID
-                    listaProcesosNombre[contadorProcesos] <- nombre
-                    listaProcesosPrioridad[contadorProcesos] <- prioridad
-                    listaProcesosMemoria[contadorProcesos] <- bloqueMemoria
-                    Escribir "[OK] Proceso agregado a la lista de procesos activos"
-                    
-                    // PASO 2: ASIGNAR MEMORIA (PUSH en pila LIFO)
-                    contadorPila <- contadorPila + 1
-                    pilaMemoriaID[contadorPila] <- ID
-                    pilaMemoriaBloque[contadorPila] <- bloqueMemoria
-                    Escribir "[OK] Bloque de memoria ", bloqueMemoria, " asignado al proceso ", ID
-                    
-                    // PASO 3: ENCOLAR POR PRIORIDAD
-                    Si contadorCola = 0 Entonces
-                        // La cola esta vacia, agregar como primer elemento
-                        contadorCola <- 1
-                        colaEjecucionID[1] <- ID
-                        Escribir "[OK] Proceso agregado como primero en la cola de ejecucion"
-                    Sino
-                        // La cola tiene elementos, insertar segun prioridad
-                        posInsercion <- 0
-                        
-                        // Buscar la posicion correcta para insertar
-                        Para i <- 1 Hasta contadorCola Con Paso 1 Hacer
-                            idEnCola <- colaEjecucionID[i]
-                            
-                            // Buscar la prioridad del proceso que esta en la cola
-                            Para j <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                                Si listaProcesosID[j] = idEnCola Entonces
-                                    prioridadActual <- listaProcesosPrioridad[j]
-                                FinSi
-                            FinPara
-                            
-                            // Si la nueva prioridad es menor o igual (mas alta), marcar posicion
-                            Si prioridad <= prioridadActual Y posInsercion = 0 Entonces
-                                posInsercion <- i
-                            FinSi
-                        FinPara
-                        
-                        // Insertar en la posicion encontrada o al final
-                        Si posInsercion = 0 Entonces
-                            // Insertar al final de la cola (menor prioridad)
-                            contadorCola <- contadorCola + 1
-                            colaEjecucionID[contadorCola] <- ID
-                            Escribir "[OK] Proceso encolado al final (menor prioridad)"
-                        Sino
-                            // Desplazar elementos y insertar en la posicion correcta
-                            Para i <- contadorCola Hasta posInsercion Con Paso -1 Hacer
-                                colaEjecucionID[i + 1] <- colaEjecucionID[i]
-                            FinPara
-                            colaEjecucionID[posInsercion] <- ID
-                            contadorCola <- contadorCola + 1
-                            Escribir "[OK] Proceso encolado en posicion ", posInsercion, " (prioridad ", prioridad, ")"
-                        FinSi
-                    FinSi
-                    
-                    // Resumen final
-                    Escribir ""
-                    Escribir "=========================================================="
-                    Escribir "   PROCESO REGISTRADO EXITOSAMENTE"
-                    Escribir "=========================================================="
-                    Escribir "  ID:              ", ID
-                    Escribir "  Nombre:          ", nombre
-                    Escribir "  Prioridad:       ", prioridad, " (1 = maxima)"
-                    Escribir "  Memoria:         Bloque ", bloqueMemoria
-                    Escribir "=========================================================="
-                    
-                Sino
-                    Escribir ""
-                    Escribir "=========================================================="
-                    Escribir "[ERROR] No se pudo agregar el proceso"
-                    Escribir "Revise los errores mostrados arriba"
-                    Escribir "=========================================================="
-                FinSi
-                
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-            Caso 2:
-                // ============================================================
-                // OPCION 2: MOSTRAR LISTA DE PROCESOS
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   LISTA DE PROCESOS ACTIVOS"
-                Escribir "=========================================================="
-                Escribir ""
-                
-                Si contadorProcesos = 0 Entonces
-                    Escribir "No hay procesos registrados en el sistema."
-                    Escribir ""
-                    Escribir "Use la opcion 1 del menu para agregar procesos."
-                Sino
-                    Escribir "Total de procesos registrados: ", contadorProcesos
-                    Escribir ""
-                    Escribir "ID    NOMBRE                PRIORIDAD    MEMORIA"
-                    Escribir "----------------------------------------------------------"
-                    Para i <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                        Escribir listaProcesosID[i], "     ", listaProcesosNombre[i], "           ", listaProcesosPrioridad[i], "            Bloque ", listaProcesosMemoria[i]
-                    FinPara
-                    Escribir "=========================================================="
-                FinSi
-                
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-            Caso 3:
-                // ============================================================
-                // OPCION 3: MOSTRAR COLA DE EJECUCION
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   COLA DE EJECUCION (Planificador CPU)"
-                Escribir "=========================================================="
-                Escribir ""
-                
-                Si contadorCola = 0 Entonces
-                    Escribir "La cola de ejecucion esta vacia."
-                    Escribir ""
-                    Escribir "Agregue procesos usando la opcion 1 del menu."
-                Sino
-                    Escribir "Procesos ordenados por prioridad (1 = maxima prioridad):"
-                    Escribir "El primer proceso se ejecutara primero."
-                    Escribir ""
-                    Escribir "POS.  ID    NOMBRE                PRIORIDAD"
-                    Escribir "----------------------------------------------------------"
-                    
-                    Para i <- 1 Hasta contadorCola Con Paso 1 Hacer
-                        idEnCola <- colaEjecucionID[i]
-                        
-                        // Buscar datos del proceso en la lista
-                        Para j <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                            Si listaProcesosID[j] = idEnCola Entonces
-                                Escribir i, "     ", idEnCola, "     ", listaProcesosNombre[j], "           ", listaProcesosPrioridad[j]
-                            FinSi
-                        FinPara
-                    FinPara
-                    
-                    Escribir "=========================================================="
-                    Escribir "Total de procesos en cola: ", contadorCola
-                FinSi
-                
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-            Caso 4:
-                // ============================================================
-                // OPCION 4: MOSTRAR ESTADO DE MEMORIA
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   ESTADO DE MEMORIA (Pila LIFO)"
-                Escribir "=========================================================="
-                Escribir ""
-                
-                Si contadorPila = 0 Entonces
-                    Escribir "No hay bloques de memoria asignados."
-                    Escribir ""
-                    Escribir "Los bloques se asignan automaticamente al agregar procesos."
-                Sino
-                    Escribir "Bloques de memoria ocupados (LIFO):"
-                    Escribir "LIFO = Last In First Out (Ultimo en entrar, primero en salir)"
-                    Escribir ""
-                    Escribir "ORDEN  BLOQUE    PROCESO ID"
-                    Escribir "----------------------------------------------------------"
-                    
-                    // Mostrar desde el tope de la pila hacia abajo
-                    Para i <- contadorPila Hasta 1 Con Paso -1 Hacer
-                        Escribir contadorPila - i + 1, "      ", pilaMemoriaBloque[i], "         ", pilaMemoriaID[i]
-                    FinPara
-                    
-                    Escribir "=========================================================="
-                    Escribir "Total de bloques ocupados: ", contadorPila
-                    Escribir ""
-                    Escribir "NOTA: El bloque en la posicion 1 (tope) se liberara primero."
-                FinSi
-                
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-            Caso 5:
-                // ============================================================
-                // OPCION 5: EJECUTAR PROCESO (Desencolar)
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   EJECUTAR PROCESO (Desencolar)"
-                Escribir "=========================================================="
-                Escribir ""
-                
-                Si contadorCola = 0 Entonces
-                    Escribir "[ERROR] No hay procesos en la cola de ejecucion"
-                    Escribir ""
-                    Escribir "Agregue procesos usando la opcion 1 del menu."
-                Sino
-                    // Obtener el primer proceso de la cola (mayor prioridad)
-                    idEnCola <- colaEjecucionID[1]
-
-                    // Buscar informacion del proceso
-                    Escribir "Proceso a ejecutar:"
-                    Para i <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                        Si listaProcesosID[i] = idEnCola Entonces
-                            Escribir "  ID:        ", listaProcesosID[i]
-                            Escribir "  Nombre:    ", listaProcesosNombre[i]
-                            Escribir "  Prioridad: ", listaProcesosPrioridad[i]
-                            Escribir "  Memoria:   Bloque ", listaProcesosMemoria[i]
-                        FinSi
-                    FinPara
-                    
-                    Escribir ""
-                    Escribir "=========================================================="
-                    Escribir "EJECUTANDO PROCESO..."
-                    Escribir "=========================================================="
-                    
-                    // Simular ejecucion
-                    Escribir "[OK] Proceso ID ", idEnCola, " en ejecucion..."
-                    Escribir "[OK] Proceso completado exitosamente"
-                    
-                    // DESENCOLAR: Eliminar de la cola (mover todos hacia adelante)
-                    Para i <- 1 Hasta contadorCola - 1 Con Paso 1 Hacer
-                        colaEjecucionID[i] <- colaEjecucionID[i + 1]
-                    FinPara
-                    contadorCola <- contadorCola - 1
-                    Escribir "[OK] Proceso removido de la cola de ejecucion"
-                    
-                    Escribir ""
-                    Escribir "=========================================================="
-                    Escribir "   PROCESO EJECUTADO EXITOSAMENTE"
-                    Escribir "=========================================================="
-                    Escribir "Procesos restantes en cola: ", contadorCola
-                FinSi
-                
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-            Caso 6:
-                // ============================================================
-                // OPCION 6: ELIMINAR PROCESO
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   ELIMINAR PROCESO"
-                Escribir "=========================================================="
-                Escribir ""
-                
-                Si contadorProcesos = 0 Entonces
-                    Escribir "[ERROR] No hay procesos en el sistema"
-                    Escribir ""
-                    Escribir "Agregue procesos usando la opcion 1 del menu."
-                Sino
-                    // Mostrar procesos disponibles
-                    Escribir "Procesos disponibles:"
-                    Escribir ""
-                    Escribir "ID    NOMBRE                PRIORIDAD"
-                    Escribir "----------------------------------------------"
-                    Para i <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                        Escribir listaProcesosID[i], "     ", listaProcesosNombre[i], "           ", listaProcesosPrioridad[i]
-                    FinPara
-                    Escribir ""
-                    
-                    // Solicitar ID del proceso a eliminar
-                    Escribir Sin Saltar "Ingrese el ID del proceso a eliminar: "
-                    Leer ID
-                    
-                    // Buscar el proceso
-                    existeID <- Falso
-                    posInsercion <- 0
-                    
-                    Para i <- 1 Hasta contadorProcesos Con Paso 1 Hacer
-                        Si listaProcesosID[i] = ID Entonces
-                            existeID <- Verdadero
-                            posInsercion <- i
-                            bloqueMemoria <- listaProcesosMemoria[i]
-                            nombre <- listaProcesosNombre[i]
-                        FinSi
-                    FinPara
-                    
-                    Si existeID Entonces
-                        Escribir ""
-                        Escribir "=========================================================="
-                        Escribir "ELIMINANDO PROCESO: ", nombre, " (ID: ", ID, ")"
-                        Escribir "=========================================================="
-                        
-                        // PASO 1: ELIMINAR DE LA LISTA
-                        Para i <- posInsercion Hasta contadorProcesos - 1 Con Paso 1 Hacer
-                            listaProcesosID[i] <- listaProcesosID[i + 1]
-                            listaProcesosNombre[i] <- listaProcesosNombre[i + 1]
-                            listaProcesosPrioridad[i] <- listaProcesosPrioridad[i + 1]
-                            listaProcesosMemoria[i] <- listaProcesosMemoria[i + 1]
-                        FinPara
-                        contadorProcesos <- contadorProcesos - 1
-                        Escribir "[OK] Proceso removido de la lista"
-                        
-                        // PASO 2: ELIMINAR DE LA COLA
-                        existeBloque <- Falso
-                        Para i <- 1 Hasta contadorCola Con Paso 1 Hacer
-                            Si colaEjecucionID[i] = ID Entonces
-                                existeBloque <- Verdadero
-                                posInsercion <- i
-                            FinSi
-                        FinPara
-                        
-                        Si existeBloque Entonces
-                            Para i <- posInsercion Hasta contadorCola - 1 Con Paso 1 Hacer
-                                colaEjecucionID[i] <- colaEjecucionID[i + 1]
-                            FinPara
-                            contadorCola <- contadorCola - 1
-                            Escribir "[OK] Proceso removido de la cola de ejecucion"
-                        FinSi
-                        
-                        // PASO 3: LIBERAR MEMORIA (POP de la pila)
-                        existeBloque <- Falso
-                        Para i <- 1 Hasta contadorPila Con Paso 1 Hacer
-                            Si pilaMemoriaID[i] = ID Entonces
-                                existeBloque <- Verdadero
-                                posInsercion <- i
-                            FinSi
-                        FinPara
-                        
-                        Si existeBloque Entonces
-                            Para i <- posInsercion Hasta contadorPila - 1 Con Paso 1 Hacer
-                                pilaMemoriaID[i] <- pilaMemoriaID[i + 1]
-                                pilaMemoriaBloque[i] <- pilaMemoriaBloque[i + 1]
-                            FinPara
-                            contadorPila <- contadorPila - 1
-                            Escribir "[OK] Bloque de memoria ", bloqueMemoria, " liberado"
-                        FinSi
-                        
-                        Escribir ""
-                        Escribir "=========================================================="
-                        Escribir "   PROCESO ELIMINADO EXITOSAMENTE"
-                        Escribir "=========================================================="
-                        Escribir "Procesos activos restantes: ", contadorProcesos
-                    Sino
-                        Escribir ""
-                        Escribir "[ERROR] No existe un proceso con el ID ", ID
-                    FinSi
-                FinSi
-                
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-            Caso 0:
-                // ============================================================
-                // SALIR DEL SISTEMA
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "   CERRANDO SISTEMA DE GESTION DE PROCESOS"
-                Escribir "=========================================================="
-                Escribir ""
-                Escribir "Gracias por usar el sistema."
-                Escribir "Grupo C - NRC 62159"
-                Escribir ""
-                Escribir "=========================================================="
-                continuar <- Falso
-                
-            De Otro Modo:
-                // ============================================================
-                // OPCION INVALIDA
-                // ============================================================
-                Limpiar Pantalla
-                Escribir "=========================================================="
-                Escribir "[ERROR] Opcion no valida"
-                Escribir "=========================================================="
-                Escribir ""
-                Escribir "Por favor, seleccione una opcion valida (0-6)."
-                Escribir ""
-                Escribir "Presione ENTER para continuar..."
-                Esperar Tecla
-                
-        FinSegun
-        
-    FinMientras
-    
-FinProceso
+Algoritmo SistemaGestionProcesos
+	// ===================================================================
+	// DECLARACION DE VARIABLES GLOBALES
+	// ===================================================================
+	Definir opcion Como Entero
+	Definir continuar Como Lógico
+	Definir ID, prioridad, bloqueMemoria Como Entero
+	Definir nombre Como Cadena
+	Definir existeID, existeBloque, procesoValido Como Lógico
+	Definir i, j Como Entero
+	Definir posInsercion, prioridadActual, idEnCola Como Entero
+	// Arreglos para almacenar hasta 100 procesos
+	Dimensionar listaProcesosID(100)
+	Dimensionar listaProcesosNombre(100)
+	Dimensionar listaProcesosPrioridad(100)
+	Dimensionar listaProcesosMemoria(100)
+	Dimensionar colaEjecucionID(100)
+	Dimensionar pilaMemoriaID(100)
+	Dimensionar pilaMemoriaBloque(100)
+	// Inicializar contadores
+	contadorProcesos <- 0
+	contadorCola <- 0
+	contadorPila <- 0
+	continuar <- Verdadero
+	// ===================================================================
+	// BUCLE PRINCIPAL DEL MENU
+	// ===================================================================
+	Mientras continuar Hacer
+		Limpiar Pantalla
+		Escribir '=========================================================='
+		Escribir '   SISTEMA DE GESTION DE PROCESOS - GRUPO C'
+		Escribir '   Estructura de Datos - NRC: 62159'
+		Escribir '=========================================================='
+		Escribir ''
+		Escribir 'MENU PRINCIPAL:'
+		Escribir '  1. Agregar Nuevo Proceso'
+		Escribir '  2. Mostrar Lista de Procesos'
+		Escribir '  3. Mostrar Cola de Ejecucion'
+		Escribir '  4. Mostrar Estado de Memoria'
+		Escribir '  5. Ejecutar Proceso (Desencolar)'
+		Escribir '  6. Eliminar Proceso'
+		Escribir '  0. Salir del Sistema'
+		Escribir '=========================================================='
+		Escribir ''
+		Escribir 'Estado actual del sistema:'
+		Escribir '  - Procesos Activos: ', contadorProcesos
+		Escribir '  - Procesos en Cola: ', contadorCola
+		Escribir '  - Bloques de Memoria Ocupados: ', contadorPila
+		Escribir ''
+		Escribir 'Seleccione una opcion: 'Sin Saltar
+		Leer opcion
+		Según opcion Hacer
+			1:
+				// ============================================================
+				// OPCION 1: AGREGAR NUEVO PROCESO
+				// ============================================================
+				Limpiar Pantalla
+				Escribir '=========================================================='
+				Escribir '   AGREGAR NUEVO PROCESO'
+				Escribir '=========================================================='
+				Escribir ''
+				// Solicitar datos del proceso
+				Escribir 'Ingrese el ID del proceso (numero entero positivo y unico):'
+				Escribir 'ID: 'Sin Saltar
+				Leer ID
+				Escribir ''
+				Escribir 'Ingrese el nombre del proceso:'
+				Escribir 'Nombre: 'Sin Saltar
+				Leer nombre
+				Escribir ''
+				Escribir 'Ingrese la prioridad (1 = maxima prioridad, 2, 3, 4...):'
+				Escribir 'Prioridad: 'Sin Saltar
+				Leer prioridad
+				Escribir ''
+				Escribir 'Ingrese el bloque de memoria a asignar (numero entero positivo y unico):'
+				Escribir 'Bloque: 'Sin Saltar
+				Leer bloqueMemoria
+				Escribir ''
+				Escribir '=========================================================='
+				Escribir 'VALIDANDO DATOS...'
+				Escribir '=========================================================='
+				// Inicializar bandera de validacion
+				procesoValido <- Verdadero
+				// VALIDACION 1: ID debe ser positivo
+				Si ID<=0 Entonces
+					Escribir '[ERROR] El ID debe ser un numero positivo mayor que 0'
+					procesoValido <- Falso
+				FinSi
+				// VALIDACION 2: Prioridad debe ser positiva
+				Si prioridad<=0 Entonces
+					Escribir '[ERROR] La prioridad debe ser un numero positivo (1 o mayor)'
+					procesoValido <- Falso
+				FinSi
+				// VALIDACION 3: Bloque de memoria debe ser positivo
+				Si bloqueMemoria<=0 Entonces
+					Escribir '[ERROR] El bloque de memoria debe ser un numero positivo'
+					procesoValido <- Falso
+				FinSi
+				// VALIDACION 4: Nombre no puede estar vacio
+				Si Longitud(nombre)=0 Entonces
+					Escribir '[ERROR] El nombre del proceso no puede estar vacio'
+					procesoValido <- Falso
+				FinSi
+				// VALIDACION 5: ID debe ser unico
+				Si procesoValido Entonces
+					existeID <- Falso
+					Para i<-1 Hasta contadorProcesos Con Paso 1 Hacer
+						Si listaProcesosID[i]=ID Entonces
+							existeID <- Verdadero
+						FinSi
+					FinPara
+					Si existeID Entonces
+						Escribir '[ERROR] Ya existe un proceso con el ID ', ID
+						procesoValido <- Falso
+					FinSi
+				FinSi
+				// VALIDACION 6: Bloque de memoria debe ser unico
+				Si procesoValido Entonces
+					existeBloque <- Falso
+					Para i<-1 Hasta contadorPila Con Paso 1 Hacer
+						Si pilaMemoriaBloque[i]=bloqueMemoria Entonces
+							existeBloque <- Verdadero
+						FinSi
+					FinPara
+					Si existeBloque Entonces
+						Escribir '[ERROR] El bloque de memoria ', bloqueMemoria, ' ya esta ocupado'
+						procesoValido <- Falso
+					FinSi
+				FinSi
+				// Si todas las validaciones pasaron, registrar el proceso
+				Si procesoValido Entonces
+					Escribir ''
+					Escribir 'Validacion exitosa. Registrando proceso...'
+					Escribir ''
+					// PASO 1: INSERTAR EN LISTA ENLAZADA
+					contadorProcesos <- contadorProcesos+1
+					listaProcesosID[contadorProcesos] <- ID
+					listaProcesosNombre[contadorProcesos] <- nombre
+					listaProcesosPrioridad[contadorProcesos] <- prioridad
+					listaProcesosMemoria[contadorProcesos] <- bloqueMemoria
+					Escribir '[OK] Proceso agregado a la lista de procesos activos'
+					// PASO 2: ASIGNAR MEMORIA (PUSH en pila LIFO)
+					contadorPila <- contadorPila+1
+					pilaMemoriaID[contadorPila] <- ID
+					pilaMemoriaBloque[contadorPila] <- bloqueMemoria
+					Escribir '[OK] Bloque de memoria ', bloqueMemoria, ' asignado al proceso ', ID
+					// PASO 3: ENCOLAR POR PRIORIDAD
+					Si contadorCola=0 Entonces
+						// La cola esta vacia, agregar como primer elemento
+						contadorCola <- 1
