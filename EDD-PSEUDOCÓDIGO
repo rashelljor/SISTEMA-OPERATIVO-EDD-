@@ -1,4 +1,6 @@
 Algoritmo SistemaGestionProcesos
+	//El sistema mantiene tres estructuras paralelas: una "lista" de procesos (arreglos paralelos y contador), una cola de ejecución que guarda sólo IDs ordenados por prioridad y una pila LIFO que registra bloques de memoria asignados.
+	// Operaciones principales: agregar proceso (registra en lista, asigna memoria en pila, encola por prioridad), mostrar listas/cola/memoria, ejecutar (desencolar), eliminar proceso (debe borrar de lista, cola y pila).
 	// ===================================================================
 	// DECLARACION DE VARIABLES GLOBALES
 	// ===================================================================
