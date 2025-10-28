@@ -179,3 +179,184 @@ Proceso SistemaGestionProcesos
                         Escribir "[OK] Proceso agregado como primero en la cola de ejecucion"
                     Sino
                         // La cola tiene elementos, insertar segun prioridad
+                        posInsercion <- 0
+                        
+                        // Buscar la posicion correcta para insertar
+                        Para i <- 1 Hasta contadorCola Con Paso 1 Hacer
+                            idEnCola <- colaEjecucionID[i]
+                            
+                            // Buscar la prioridad del proceso que esta en la cola
+                            Para j <- 1 Hasta contadorProcesos Con Paso 1 Hacer
+                                Si listaProcesosID[j] = idEnCola Entonces
+                                    prioridadActual <- listaProcesosPrioridad[j]
+                                FinSi
+                            FinPara
+                            
+                            // Si la nueva prioridad es menor o igual (mas alta), marcar posicion
+                            Si prioridad <= prioridadActual Y posInsercion = 0 Entonces
+                                posInsercion <- i
+                            FinSi
+                        FinPara
+                        
+                        // Insertar en la posicion encontrada o al final
+                        Si posInsercion = 0 Entonces
+                            // Insertar al final de la cola (menor prioridad)
+                            contadorCola <- contadorCola + 1
+                            colaEjecucionID[contadorCola] <- ID
+                            Escribir "[OK] Proceso encolado al final (menor prioridad)"
+                        Sino
+                            // Desplazar elementos y insertar en la posicion correcta
+                            Para i <- contadorCola Hasta posInsercion Con Paso -1 Hacer
+                                colaEjecucionID[i + 1] <- colaEjecucionID[i]
+                            FinPara
+                            colaEjecucionID[posInsercion] <- ID
+                            contadorCola <- contadorCola + 1
+                            Escribir "[OK] Proceso encolado en posicion ", posInsercion, " (prioridad ", prioridad, ")"
+                        FinSi
+                    FinSi
+                    
+                    // Resumen final
+                    Escribir ""
+                    Escribir "=========================================================="
+                    Escribir "   PROCESO REGISTRADO EXITOSAMENTE"
+                    Escribir "=========================================================="
+                    Escribir "  ID:              ", ID
+                    Escribir "  Nombre:          ", nombre
+                    Escribir "  Prioridad:       ", prioridad, " (1 = maxima)"
+                    Escribir "  Memoria:         Bloque ", bloqueMemoria
+                    Escribir "=========================================================="
+                    
+                Sino
+                    Escribir ""
+                    Escribir "=========================================================="
+                    Escribir "[ERROR] No se pudo agregar el proceso"
+                    Escribir "Revise los errores mostrados arriba"
+                    Escribir "=========================================================="
+                FinSi
+                
+                Escribir ""
+                Escribir "Presione ENTER para continuar..."
+                Esperar Tecla
+                
+            Caso 2:
+                // ============================================================
+                // OPCION 2: MOSTRAR LISTA DE PROCESOS
+                // ============================================================
+                Limpiar Pantalla
+                Escribir "=========================================================="
+                Escribir "   LISTA DE PROCESOS ACTIVOS"
+                Escribir "=========================================================="
+                Escribir ""
+                
+                Si contadorProcesos = 0 Entonces
+                    Escribir "No hay procesos registrados en el sistema."
+                    Escribir ""
+                    Escribir "Use la opcion 1 del menu para agregar procesos."
+                Sino
+                    Escribir "Total de procesos registrados: ", contadorProcesos
+                    Escribir ""
+                    Escribir "ID    NOMBRE                PRIORIDAD    MEMORIA"
+                    Escribir "----------------------------------------------------------"
+                    Para i <- 1 Hasta contadorProcesos Con Paso 1 Hacer
+                        Escribir listaProcesosID[i], "     ", listaProcesosNombre[i], "           ", listaProcesosPrioridad[i], "            Bloque ", listaProcesosMemoria[i]
+                    FinPara
+                    Escribir "=========================================================="
+                FinSi
+                
+                Escribir ""
+                Escribir "Presione ENTER para continuar..."
+                Esperar Tecla
+                
+            Caso 3:
+                // ============================================================
+                // OPCION 3: MOSTRAR COLA DE EJECUCION
+                // ============================================================
+                Limpiar Pantalla
+                Escribir "=========================================================="
+                Escribir "   COLA DE EJECUCION (Planificador CPU)"
+                Escribir "=========================================================="
+                Escribir ""
+                
+                Si contadorCola = 0 Entonces
+                    Escribir "La cola de ejecucion esta vacia."
+                    Escribir ""
+                    Escribir "Agregue procesos usando la opcion 1 del menu."
+                Sino
+                    Escribir "Procesos ordenados por prioridad (1 = maxima prioridad):"
+                    Escribir "El primer proceso se ejecutara primero."
+                    Escribir ""
+                    Escribir "POS.  ID    NOMBRE                PRIORIDAD"
+                    Escribir "----------------------------------------------------------"
+                    
+                    Para i <- 1 Hasta contadorCola Con Paso 1 Hacer
+                        idEnCola <- colaEjecucionID[i]
+                        
+                        // Buscar datos del proceso en la lista
+                        Para j <- 1 Hasta contadorProcesos Con Paso 1 Hacer
+                            Si listaProcesosID[j] = idEnCola Entonces
+                                Escribir i, "     ", idEnCola, "     ", listaProcesosNombre[j], "           ", listaProcesosPrioridad[j]
+                            FinSi
+                        FinPara
+                    FinPara
+                    
+                    Escribir "=========================================================="
+                    Escribir "Total de procesos en cola: ", contadorCola
+                FinSi
+                
+                Escribir ""
+                Escribir "Presione ENTER para continuar..."
+                Esperar Tecla
+                
+            Caso 4:
+                // ============================================================
+                // OPCION 4: MOSTRAR ESTADO DE MEMORIA
+                // ============================================================
+                Limpiar Pantalla
+                Escribir "=========================================================="
+                Escribir "   ESTADO DE MEMORIA (Pila LIFO)"
+                Escribir "=========================================================="
+                Escribir ""
+                
+                Si contadorPila = 0 Entonces
+                    Escribir "No hay bloques de memoria asignados."
+                    Escribir ""
+                    Escribir "Los bloques se asignan automaticamente al agregar procesos."
+                Sino
+                    Escribir "Bloques de memoria ocupados (LIFO):"
+                    Escribir "LIFO = Last In First Out (Ultimo en entrar, primero en salir)"
+                    Escribir ""
+                    Escribir "ORDEN  BLOQUE    PROCESO ID"
+                    Escribir "----------------------------------------------------------"
+                    
+                    // Mostrar desde el tope de la pila hacia abajo
+                    Para i <- contadorPila Hasta 1 Con Paso -1 Hacer
+                        Escribir contadorPila - i + 1, "      ", pilaMemoriaBloque[i], "         ", pilaMemoriaID[i]
+                    FinPara
+                    
+                    Escribir "=========================================================="
+                    Escribir "Total de bloques ocupados: ", contadorPila
+                    Escribir ""
+                    Escribir "NOTA: El bloque en la posicion 1 (tope) se liberara primero."
+                FinSi
+                
+                Escribir ""
+                Escribir "Presione ENTER para continuar..."
+                Esperar Tecla
+                
+            Caso 5:
+                // ============================================================
+                // OPCION 5: EJECUTAR PROCESO (Desencolar)
+                // ============================================================
+                Limpiar Pantalla
+                Escribir "=========================================================="
+                Escribir "   EJECUTAR PROCESO (Desencolar)"
+                Escribir "=========================================================="
+                Escribir ""
+                
+                Si contadorCola = 0 Entonces
+                    Escribir "[ERROR] No hay procesos en la cola de ejecucion"
+                    Escribir ""
+                    Escribir "Agregue procesos usando la opcion 1 del menu."
+                Sino
+                    // Obtener el primer proceso de la cola (mayor prioridad)
+                    idEnCola <- colaEjecucionID[1]
